@@ -207,3 +207,89 @@ une documentation exploitable
 un MVP démontrable
 
 👉 Projet prêt pour exploitation réelle ou démonstration professionnelle
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+🧱 Architecture POC – MINIMAL ABSOLU
+🔢 Nombre de machines : 3 machines
+VM	Rôle principal
+VM1	Kubernetes Control Plane + Worker
+VM2	Worker Kubernetes (apps + DB)
+VM3	CI/CD + Observabilité
+
+👉 3 VM = le strict minimum crédible
+
+🖥️ Détail des rôles
+🟦 VM1 — Kubernetes “All-in-One”
+Rôles
+
+Control Plane Kubernetes
+
+etcd
+
+Worker
+
+Services
+
+kube-apiserver
+
+scheduler
+
+controller
+
+Ingress NGINX
+
+ArgoCD (GitOps)
+
+Specs mini
+
+4 vCPU
+
+8 Go RAM
+
+60 Go disque
+
+🟩 VM2 — Worker applicatif
+Rôles
+
+Hébergement OpenMRS
+
+Base MySQL (StatefulSet)
+
+Vault (ou Sealed Secrets)
+
+Service Mesh (optionnel)
+
+Specs mini
+
+4 vCPU
+
+8–12 Go RAM
+
+80 Go disque
+
+🟨 VM3 — DevSecOps & visibilité
+Rôles
+
+GitLab (ou GitHub Runner)
+
+Registry Docker
+
+Prometheus + Grafana
+
+Loki
+
+Trivy / Grype
+
+Specs mini
+
+4 vCPU
+
+8 Go RAM
+
+80 Go disque
+
+
+
