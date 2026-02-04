@@ -1,0 +1,6 @@
+Conteneuriser OpenEMR avec Docker (utiliser l'image officielle ou créer votre Dockerfile)
+Créer un docker-compose.yml avec OpenEMR + MariaDB + phpMyAdmin
+Configurer les volumes persistants pour les données patients
+Mettre en place un reverse proxy Nginx/Traefik devant OpenEMR
+Configurer HTTPS local avec certificats auto-signés
+Documenter le processus dans le repo Git
