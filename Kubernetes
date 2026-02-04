@@ -1,0 +1,7 @@
+Actions à réaliser
+Installer un cluster Kubernetes local (Minikube ou K3s)
+Convertir le docker-compose en manifestes Kubernetes (Deployments, Services, ConfigMaps, Secrets)
+Déployer OpenEMR sur Kubernetes local
+Configurer les PersistentVolumeClaims pour MariaDB
+Mettre en place un Ingress Controller (Nginx Ingress)
+Organiser les manifestes par namespaces (openemr, monitoring, etc.)
