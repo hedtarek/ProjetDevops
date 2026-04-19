@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openmrs
+  namespace: openmrs-prod
+  labels:
+    app: openmrs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openmrs
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: openmrs
+    spec:
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z mysql.openmrs-prod.svc.cluster.local 3306; do
+            echo "Attente MySQL..."
+            sleep 5
+          done
+          echo "MySQL disponible"
+      containers:
+      - name: openmrs
+        image: openmrs/openmrs-reference-application:2.13.0
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: OMRS_DB_HOSTNAME
+          value: "mysql"
+        - name: OMRS_DB_PORT
+          value: "3306"
+        - name: OMRS_DB_NAME
+          value: "openmrs"
+        - name: OMRS_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER
+        - name: OMRS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD
+        - name: OMRS_JAVA_SERVER_OPTS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Xms512m"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1500m"
+        startupProbe:
+          httpGet:
+            path: /openmrs/health
+            port: 8080
+          failureThreshold: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /openmrs/health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 10
+        livenessProbe:
+          httpGet:
+            path: /openmrs/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          failureThreshold: 5
+        volumeMounts:
+        - name: openmrs-data
+          mountPath: /openmrs/data
+      volumes:
+      - name: openmrs-data
+        persistentVolumeClaim:
+          claimName: openmrs-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openmrs-svc
+  namespace: openmrs-prod
+spec:
+  type: ClusterIP
+  selector:
+    app: openmrs
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http

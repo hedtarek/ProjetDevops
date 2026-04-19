@@ -1,0 +1,76 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: openmrs-alerting
+  namespace: monitoring
+  labels:
+    release: prometheus
+    app: kube-prometheus-stack
+spec:
+  groups:
+  - name: openmrs.critical
+    interval: 30s
+    rules:
+    - alert: OpenMRSDown
+      expr: |
+        kube_deployment_status_replicas_available{
+          namespace="openmrs-prod",
+          deployment="openmrs"
+        } < 1
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "OpenMRS indisponible depuis 2 minutes"
+        description: "Le déploiement OpenMRS a 0 réplicas disponibles."
+
+    - alert: MySQLDown
+      expr: |
+        kube_pod_status_phase{
+          namespace="openmrs-prod",
+          pod=~"mysql-.*",
+          phase="Running"
+        } == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MySQL est inaccessible"
+        description: "Le pod MySQL dans openmrs-prod est arrêté."
+
+    - alert: PodCrashLooping
+      expr: |
+        increase(kube_pod_container_status_restarts_total{
+          namespace="openmrs-prod"
+        }[1h]) > 3
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.pod }} redémarre en boucle"
+        description: "{{ $value }} redémarrages en 1 heure."
+
+  - name: openmrs.resources
+    interval: 60s
+    rules:
+    - alert: NodeDiskPressure
+      expr: |
+        (1 - node_filesystem_avail_bytes{mountpoint="/"} 
+        / node_filesystem_size_bytes{mountpoint="/"}) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Disque > 80% sur {{ $labels.instance }}"
+        description: "Utilisation disque : {{ $value | printf \"%.0f\" }}%"
+
+    - alert: NodeMemoryPressure
+      expr: |
+        (1 - node_memory_MemAvailable_bytes 
+        / node_memory_MemTotal_bytes) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "RAM > 85% sur {{ $labels.instance }}"
+        description: "Utilisation mémoire : {{ $value | printf \"%.0f\" }}%"
