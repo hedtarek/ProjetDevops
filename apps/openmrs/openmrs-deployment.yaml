@@ -53,7 +53,7 @@ spec:
               name: mysql-secret
               key: MYSQL_PASSWORD
         - name: OMRS_JAVA_SERVER_OPTS
-          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Xms512m"
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Xms512m -Xmx1500m"
         resources:
           requests:
             memory: "1Gi"
