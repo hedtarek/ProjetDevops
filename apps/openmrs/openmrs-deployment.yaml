@@ -63,20 +63,20 @@ spec:
             cpu: "1500m"
         startupProbe:
           httpGet:
-            path: /openmrs/health
+            path: /openmrs/
             port: 8080
           failureThreshold: 60
           periodSeconds: 20
         readinessProbe:
           httpGet:
-            path: /openmrs/health
+            path: /openmrs/
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 15
           failureThreshold: 10
         livenessProbe:
           httpGet:
-            path: /openmrs/health
+            path: /openmrs/
             port: 8080
           initialDelaySeconds: 120
           periodSeconds: 30
